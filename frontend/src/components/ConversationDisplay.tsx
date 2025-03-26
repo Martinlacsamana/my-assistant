@@ -8,13 +8,7 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
-
-export interface Message {
-  id: string;
-  text: string;
-  sender: 'user' | 'assistant';
-  timestamp: Date;
-}
+import { Message } from '@/hooks/useAssistantApi';
 
 interface ConversationDisplayProps {
   messages: Message[];
