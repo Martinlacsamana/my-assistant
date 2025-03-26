@@ -58,6 +58,17 @@ OPENAI_API_KEY=your_openai_api_key_here
 
 Replace `your_openai_api_key_here` with your actual OpenAI API key.
 
+#### Testing the OpenAI API connection
+
+After setting up your API key, you can test the connection to OpenAI:
+
+```bash
+cd backend
+npm run test-openai
+```
+
+This will verify that your API key is working correctly before running the full application.
+
 ### 3. Set up the frontend
 
 ```bash
@@ -67,18 +78,27 @@ npm install
 
 ### 4. Start the application
 
-Start the backend server:
+You can start both the frontend and backend servers with a single command from the root directory:
 
 ```bash
-cd backend
 npm run dev
 ```
 
-In a new terminal, start the frontend development server:
+Or start them individually:
 
+Backend server:
 ```bash
-cd frontend
-npm run dev
+npm run backend
+```
+
+Frontend development server:
+```bash
+npm run frontend
+```
+
+For a fresh installation of all dependencies:
+```bash
+npm run install-all
 ```
 
 ### 5. Access the application
