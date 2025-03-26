@@ -13,15 +13,20 @@ import { Message } from '@/hooks/useAssistantApi';
 interface ConversationDisplayProps {
   messages: Message[];
   isLoading: boolean;
+  interimTranscript?: string;
 }
 
-const ConversationDisplay = ({ messages, isLoading }: ConversationDisplayProps) => {
+const ConversationDisplay = ({ 
+  messages, 
+  isLoading,
+  interimTranscript = ''
+}: ConversationDisplayProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to the bottom when new messages are added
+  // Auto-scroll to the bottom when new messages are added or interim transcript changes
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, interimTranscript, isLoading]);
 
   return (
     <div className="flex flex-col w-full h-full overflow-y-auto p-4 space-y-4">
@@ -49,6 +54,15 @@ const ConversationDisplay = ({ messages, isLoading }: ConversationDisplayProps) 
           </div>
         </div>
       ))}
+      
+      {/* Show interim transcript while user is speaking */}
+      {interimTranscript && (
+        <div className="flex justify-end">
+          <div className="max-w-[80%] p-3 rounded-lg bg-blue-400 text-white rounded-tr-none opacity-80">
+            <p className="text-sm italic">{interimTranscript}</p>
+          </div>
+        </div>
+      )}
       
       {isLoading && (
         <div className="flex justify-start">

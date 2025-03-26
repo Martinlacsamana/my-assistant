@@ -13,16 +13,16 @@ import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 
 interface MicrophoneButtonProps {
   onTranscript: (transcript: string) => void;
+  onInterimTranscript?: (transcript: string) => void;
   isListening: boolean;
   setIsListening: (isListening: boolean) => void;
-  silenceTimeout?: number; // Time in milliseconds before stopping after silence
 }
 
 const MicrophoneButton = ({ 
   onTranscript, 
+  onInterimTranscript,
   isListening, 
-  setIsListening,
-  silenceTimeout = 2000 // Default 2 seconds
+  setIsListening
 }: MicrophoneButtonProps) => {
   // Use our custom hook for speech recognition
   const {
@@ -30,11 +30,11 @@ const MicrophoneButton = ({
     startListening,
     stopListening,
     error,
-    isSupported
+    isSupported,
+    interimTranscript
   } = useSpeechRecognition({
     onTranscript,
-    silenceTimeout,
-    language: 'en-US'
+    onInterimTranscript
   });
 
   // Sync the parent component's isListening state with our hook's state
@@ -65,7 +65,7 @@ const MicrophoneButton = ({
       onClick={toggleListening}
       className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
         isListening 
-          ? 'bg-red-500 scale-110' 
+          ? 'bg-red-500 scale-110 animate-pulse' 
           : 'bg-blue-500 hover:bg-blue-600'
       }`}
       aria-label={isListening ? 'Stop listening' : 'Start listening'}

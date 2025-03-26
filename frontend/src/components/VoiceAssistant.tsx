@@ -23,6 +23,7 @@ const VoiceAssistant = () => {
   
   // State for speech recognition
   const [isListening, setIsListening] = useState(false);
+  const [interimTranscript, setInterimTranscript] = useState('');
   
   // State for text-to-speech voices
   const [selectedVoice, setSelectedVoice] = useState<SpeechSynthesisVoice | null>(null);
@@ -40,7 +41,13 @@ const VoiceAssistant = () => {
   // Handle speech recognition result
   const handleTranscript = async (transcript: string) => {
     if (!transcript.trim()) return;
+    setInterimTranscript(''); // Clear interim transcript when final result is received
     await sendMessage(transcript);
+  };
+
+  // Handle interim speech recognition results
+  const handleInterimTranscript = (transcript: string) => {
+    setInterimTranscript(transcript);
   };
 
   // Load available voices for text-to-speech
@@ -91,7 +98,11 @@ const VoiceAssistant = () => {
       
       {/* Conversation display */}
       <div className="flex-1 overflow-hidden">
-        <ConversationDisplay messages={messages} isLoading={isLoading} />
+        <ConversationDisplay 
+          messages={messages} 
+          isLoading={isLoading} 
+          interimTranscript={isListening ? interimTranscript : ''}
+        />
       </div>
       
       {/* Microphone button */}
@@ -99,9 +110,9 @@ const VoiceAssistant = () => {
         <div className="flex flex-col items-center">
           <MicrophoneButton
             onTranscript={handleTranscript}
+            onInterimTranscript={handleInterimTranscript}
             isListening={isListening}
             setIsListening={setIsListening}
-            silenceTimeout={silenceTimeout}
           />
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             {isListening ? 'Listening...' : 'Tap to speak'}
