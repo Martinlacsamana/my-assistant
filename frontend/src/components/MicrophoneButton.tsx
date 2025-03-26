@@ -58,9 +58,15 @@ interface MicrophoneButtonProps {
   onTranscript: (transcript: string) => void;
   isListening: boolean;
   setIsListening: (isListening: boolean) => void;
+  silenceTimeout?: number; // Time in milliseconds before stopping after silence
 }
 
-const MicrophoneButton = ({ onTranscript, isListening, setIsListening }: MicrophoneButtonProps) => {
+const MicrophoneButton = ({ 
+  onTranscript, 
+  isListening, 
+  setIsListening,
+  silenceTimeout = 2000 // Default 2 seconds
+}: MicrophoneButtonProps) => {
   const [error, setError] = useState<string | null>(null);
   const recognitionRef = useRef<any>(null);
 
@@ -77,10 +83,29 @@ const MicrophoneButton = ({ onTranscript, isListening, setIsListening }: Microph
       setError('Speech recognition is not supported in this browser.');
       return;
     }
-    recognitionRef.current = new SpeechRecognitionAPI();
-    recognitionRef.current.continuous = false;
-    recognitionRef.current.interimResults = false;
-    recognitionRef.current.lang = 'en-US';
+    
+    // Create and configure the recognition instance
+    const initRecognition = () => {
+      const recognition = new SpeechRecognitionAPI();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+      
+      // Note: maxSilenceTime is not a standard property, but we're adding it
+      // as a custom property for documentation purposes
+      try {
+        // Use type assertion to avoid TypeScript errors
+        (recognition as any).maxSilenceTime = silenceTimeout;
+        console.log(`Set silence timeout: ${silenceTimeout}ms`);
+      } catch (e) {
+        // If setting the property fails, we'll handle it with our manual timer
+        console.log(`Using manual silence timeout: ${silenceTimeout}ms`);
+      }
+      
+      return recognition;
+    };
+    
+    recognitionRef.current = initRecognition();
 
     // Set up event handlers
     recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
@@ -105,8 +130,11 @@ const MicrophoneButton = ({ onTranscript, isListening, setIsListening }: Microph
         recognitionRef.current.stop();
       }
     };
-  }, [onTranscript, setIsListening]);
+  }, [onTranscript, setIsListening, silenceTimeout]);
 
+  // Timer reference for manual silence detection
+  const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  
   const toggleListening = () => {
     if (error) {
       alert(error);
@@ -114,12 +142,27 @@ const MicrophoneButton = ({ onTranscript, isListening, setIsListening }: Microph
     }
 
     if (isListening) {
+      // Stop listening
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
       recognitionRef.current?.stop();
       setIsListening(false);
     } else {
       try {
+        // Start listening
         recognitionRef.current?.start();
         setIsListening(true);
+        
+        // Set a manual timeout as a fallback
+        // The Web Speech API doesn't have a standard way to set silence timeout
+        silenceTimerRef.current = setTimeout(() => {
+          console.log(`Silence timeout (${silenceTimeout}ms) reached`);
+          if (isListening && recognitionRef.current) {
+            recognitionRef.current.stop();
+          }
+        }, silenceTimeout);
       } catch (err) {
         console.error('Failed to start speech recognition:', err);
       }

@@ -31,6 +31,8 @@ const VoiceAssistant = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState<SpeechSynthesisVoice | null>(null);
   const [latestAssistantResponse, setLatestAssistantResponse] = useState<string | null>(null);
+  // Configurable silence timeout in milliseconds (default: 5 seconds)
+  const [silenceTimeout, setSilenceTimeout] = useState<number>(5000);
 
   // Load available voices for text-to-speech
   useEffect(() => {
@@ -179,6 +181,7 @@ const VoiceAssistant = () => {
             onTranscript={handleTranscript}
             isListening={isListening}
             setIsListening={setIsListening}
+            silenceTimeout={silenceTimeout}
           />
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             {isListening ? 'Listening...' : 'Tap to speak'}
