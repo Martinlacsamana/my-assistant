@@ -1,12 +1,12 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "node --watch index.js",
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "test-openai": "node test-openai.js"
+    "test-openai": "node src/utils/test-openai.js"
   },
   "keywords": [],
   "author": "",
