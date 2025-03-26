@@ -88,6 +88,11 @@ const VoiceAssistant = () => {
     await processUserMessage(transcript);
   };
 
+  // Store the thread ID for conversation continuity
+  const [threadId, setThreadId] = useState<string | null>(null);
+  // Generate a unique user ID for this session
+  const [userId] = useState<string>(`user-${uuidv4()}`);
+
   // Process user message and get assistant response
   const processUserMessage = async (message: string) => {
     setIsLoading(true);
@@ -108,10 +113,8 @@ const VoiceAssistant = () => {
           },
           body: JSON.stringify({
             message,
-            conversationHistory: messages.map(msg => ({
-              text: msg.text,
-              sender: msg.sender
-            })),
+            userId,
+            threadId, // Include threadId if we have one
           }),
         });
         
@@ -121,6 +124,12 @@ const VoiceAssistant = () => {
         
         const data = await response.json();
         assistantResponse = data.response;
+        
+        // Store the thread ID for future messages
+        if (data.threadId && !threadId) {
+          setThreadId(data.threadId);
+          console.log(`Thread established with ID: ${data.threadId}`);
+        }
       }
       
       // Add assistant response to conversation
